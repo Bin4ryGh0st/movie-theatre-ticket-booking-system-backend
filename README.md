@@ -1,1 +1,1 @@
-# movie-theatre-ticket-booking-system-backend
+# Movie Theatre Ticket Booking System Backend
