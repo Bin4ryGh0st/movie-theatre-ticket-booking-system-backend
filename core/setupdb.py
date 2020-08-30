@@ -1,38 +1,55 @@
+import os
 import sqlite3
 
+def connect(db_name):
+    conn = sqlite3.connect(db_name)
+    return conn
+
+def create_schema(conn, query):
+    prepare = conn.cursor()
+    prepare.execute(query)
+    conn.commit()
 
 def init():
-    # try:
-    database = "db.sqlite3"
-    conn = sqlite3.connect(database)
-
-    init_table_available_shows = ''' 
-    CREATE TABLE IF NOT EXISTS available_shows(
-        show_time TIMESTAMP NOT NULL PRIMARY KEY
-        );
     '''
-
-    init_table_booked_shows = '''
-    CREATE TABLE IF NOT EXISTS booked_shows(
-        username TEXT NOT NULL,
-        contact TEXT NOT NULL,
-        show_time TIMESTAMP NOT NULL,
-        FOREIGN KEY (show_time) 
-        REFERENCES available_shows(show_time)
-        ON DELETE CASCADE
-        );
+    Automated initialization of the Database
+    and Schemas for Movie Ticket Booking System
     '''
+    try:
+        database = "db.sqlite3"
+        conn = connect(database)
 
-    if conn is not None:
-        prepare = conn.cursor()
-        prepare.execute(init_table_available_shows)
+        enable_foreign_key = '''
+        PRAGMA foreign_keys=on;
+        '''
 
-        prepare = conn.cursor()
-        prepare.execute(init_table_booked_shows)
+        MAX_AVAILABLE_SLOTS = 20
 
-    # except Exception as e:
-        # print("[Following Eception occured while initializing database] :", e)
+        init_table_available_shows = ''' 
+        CREATE TABLE IF NOT EXISTS available_shows(
+            show_time TIMESTAMP NOT NULL PRIMARY KEY,
+            total_bookings INTEGER DEFAULT {}
+            );
+        '''.format(MAX_AVAILABLE_SLOTS)
+
+        init_table_booked_shows = '''
+        CREATE TABLE IF NOT EXISTS booked_shows(
+            username TEXT NOT NULL,
+            contact TEXT NOT NULL,
+            show_time TIMESTAMP NOT NULL,
+            CONSTRAINT fk_available_shows
+                FOREIGN KEY (show_time) 
+                REFERENCES available_shows(show_time)
+                ON DELETE CASCADE
+            );
+        '''
+
+        if conn is not None:
+            create_schema(conn, enable_foreign_key)
+            create_schema(conn, init_table_available_shows)
+            create_schema(conn, init_table_booked_shows)
 
 
-if __name__ == '__main__':
-    init()
+    except Exception as e:
+        print("[Following Eception occured while initializing database] :", e)
+
