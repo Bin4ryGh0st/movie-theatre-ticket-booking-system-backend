@@ -27,7 +27,7 @@ def book_ticket():
 def get_all_tickets_for_particular_show(show_id):
     try:
         return (dbutil.get_show_bookings(show_id))
-    except:
+    except Exception as e:
         print("[Following exception has occcured]", e)
         return ({"Error":"Unknown Error Occured!"})
 
@@ -35,7 +35,7 @@ def get_all_tickets_for_particular_show(show_id):
 def get_detail_from_ticket_id(ticket_id):
     try:
         return (dbutil.get_booking_details(ticket_id))
-    except:
+    except Exception as e:
         print("[Following exception has occcured]", e)
         return ({"Error":"Unknown Error Occured!"})
 
@@ -43,10 +43,18 @@ def get_detail_from_ticket_id(ticket_id):
 def delete_ticket(ticket_id):
     try:
         return (dbutil.delete_ticket(ticket_id))
-    except:
+    except Exception as e:
         print("[Following exception has occcured]", e)
         return ({"Error":"Unknown Error Occured!"})
 
+@app.route('/update/<ticket_id>/new/show/id/<new_show_id>', methods=['PUT'])
+def update_given_ticket_time(ticket_id, new_show_id):
+    try:
+        print(ticket_id, new_show_id)
+        return (dbutil.change_ticket_timing(ticket_id, new_show_id))
+    except Exception as e:
+        print("[Following exception has occcured]", e)
+        return ({"Error":"Unknown Error Occured!"})
 
 if __name__ == '__main__':
     if not os.path.exists("db.sqlite3"):
@@ -56,7 +64,7 @@ if __name__ == '__main__':
         pass
     
     dbutil = dbutils.dbutil()
-    app.run(debug=True)
+    app.run(debug=False)
     
 
 

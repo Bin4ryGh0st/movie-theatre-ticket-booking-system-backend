@@ -5,6 +5,7 @@ from datetime import datetime
 class dbutil():
     def __init__(self):
         self.__database = "db.sqlite3"
+        self.__lazy_update_cooldown = 0
         self.MAX_COOLDOWN_REQUEST = 10
         self.TIME_FOR_EXPIRY = 8*60*60
         self.MAX_AVAILABLE_SLOTS = 20
@@ -15,7 +16,6 @@ class dbutil():
             raise ConnectionError('Unable to connect Database')
             
         self.__enable_foreign_key_pragma()
-        self.__lazy_update_cooldown = 0
         self.__lazy_db_update()
 
     def __enable_foreign_key_pragma(self):
@@ -207,15 +207,23 @@ class dbutil():
             old_show_id = self.get_booking_details(ticket_id)["Show ID"]
             show_details = self.get_show_details(new_show_id)
             query = '''
-                UPDATE available_shows 
-                SET show_id = ?,
-                SET show_time = ?
-                WHERE ticket_id = ?;
+                UPDATE booked_tickets 
+                    SET show_id = ?, show_time = ?
+                WHERE 
+                    ticket_id = ? ;
             '''
             prepare = self.__conn.cursor()
-            prepare.execute(query, (new_show_id, show_details['Show Time']))
+            prepare.execute(query, (new_show_id, show_details['Show Time'], ticket_id,))
             self.__conn.commit()
-            self.__increase_seat_count(old_show_id)
-            self.__reduce_seat_count(new_show_id)
+            self.__increase_seat_count(old_show_id, showdb[old_show_id])
+            self.__reduce_seat_count(new_show_id, showdb[new_show_id])
+            
+            details = {
+                "Success" : True,
+                "Ticket ID" : ticket_id,
+                "New Show Timing" : show_details['Show Time'] 
+            }
+
+            return details 
         else:
             return {"Error" : "Show IDs are incorrect or requested show is HouseFull!"}
