@@ -3,12 +3,12 @@
 ### Zomentum Hiring Challenge (Backend)
 
 ##### Functionality :
-> 1. Endpoint for booking movie ticket for available shows.
->   $POST /book
-> 2. Endpoint to update ticket timings.
->   *PUT /update/<ticket_id>/new/show/id/<new_show_id>
-> 3. Endpoint to view all tickets for particular show.
->> GET /list/all/tickets/for/show/<show_id>
+1. Endpoint for booking movie ticket for available shows.
+  $POST /book
+2. Endpoint to update ticket timings.
+  PUT /update/<ticket_id>/new/show/id/<new_show_id>
+3. Endpoint to view all tickets for particular show.
+  GET /list/all/tickets/for/show/<show_id>
 > 4. Endpoint to delete particular ticket.
 >> DELETE /delete/ticket/<ticket_id>
 > 5. Endpoint to view the user’s details based on the ticket id.
