@@ -2,13 +2,13 @@
 ---
 ### Zomentum Hiring Challenge (Backend)
 
-##### Functionality :
+#### Functionality :
 1. Endpoint for booking movie ticket for available shows.
-  $POST /book
+  * $POST /book
 2. Endpoint to update ticket timings.
-  PUT /update/<ticket_id>/new/show/id/<new_show_id>
+  * PUT /update/<ticket_id>/new/show/id/<new_show_id>
 3. Endpoint to view all tickets for particular show.
-  GET /list/all/tickets/for/show/<show_id>
+  * GET /list/all/tickets/for/show/<show_id>
 > 4. Endpoint to delete particular ticket.
 >> DELETE /delete/ticket/<ticket_id>
 > 5. Endpoint to view the user’s details based on the ticket id.
@@ -30,16 +30,16 @@
                 ON DELETE CASCADE
             );
         '''`
-##### Techstack Used :
+#### Techstack Used :
 > 1. Python3
 > 3. Flask Microframework for creating WEB APIs.
 > 2. SQLite3 for data storage and manupulation purposes.
 
-##### Setup Procedure:
+#### Setup Procedure:
     $ #python3 & pip3 should be installed.
     $ pip3 install -r requirements.txt
     $ python3 main.py #To run in debug mode set debug=True in ./main.py
 
-###### Note : 
+##### Note : 
 > 1. REST Paradigm is used throughout the project.
 > 2. All the related snapshots of working can be found in ./snapshots/*
