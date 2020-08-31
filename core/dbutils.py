@@ -8,9 +8,9 @@ class dbutil():
         self.MAX_COOLDOWN_REQUEST = 10
         self.TIME_FOR_EXPIRY = 8*60*60
         self.MAX_AVAILABLE_SLOTS = 20
-        
+
         try:
-            self.__conn = sqlite3.connect(self.__database)
+            self.__conn = sqlite3.connect(self.__database, check_same_thread=False)
         except:
             raise ConnectionError('Unable to connect Database')
             
@@ -20,7 +20,7 @@ class dbutil():
 
     def __enable_foreign_key_pragma(self):
         enable_foreign_key = '''
-        PRAGMA foreign_keys=on;
+            PRAGMA foreign_keys=on;
         '''
         prepare = self.__conn.cursor()
         prepare.execute(enable_foreign_key)
@@ -51,7 +51,6 @@ class dbutil():
             self.__conn.commit()
 
     def __lazy_db_update(self):
-        
         if self.__lazy_update_cooldown == 0:
             show_db = self.list_shows()
             stale_show_ids = []
@@ -74,8 +73,8 @@ class dbutil():
             
     def add_show(self, timestamp, show_id):
         query = '''
-        INSERT INTO available_shows (show_id, show_time)
-        VALUES (?, ?);
+            INSERT INTO available_shows (show_id, show_time)
+            VALUES (?, ?);
         '''
         prepare = self.__conn.cursor()
         prepare.execute(query, (show_id, timestamp,))
@@ -113,7 +112,7 @@ class dbutil():
 
     def list_shows(self, show_id_only = False):
         query = '''
-        SELECT * FROM available_shows; 
+            SELECT * FROM available_shows; 
         '''
         prepare = self.__conn.cursor()
         prepare.execute(query)
@@ -138,17 +137,18 @@ class dbutil():
     
     def delete_ticket(self, ticket_id):
         query = '''
-        DELETE FROM booked_tickets WHERE ticket_id = ? ;
+            DELETE FROM booked_tickets WHERE ticket_id = ? ;
         '''
 
         prepare = self.__conn.cursor()
         prepare.execute(query, (ticket_id,))
 
         self.__conn.commit()
+        return {"Success" : "Tickect has been deleted iff it was present earlier!"}
         
     def get_show_bookings(self, show_id):
         query = '''
-        SELECT ticket_id FROM booked_tickets WHERE show_id = ? ;
+            SELECT ticket_id FROM booked_tickets WHERE show_id = ? ;
         '''
 
         prepare = self.__conn.cursor()
