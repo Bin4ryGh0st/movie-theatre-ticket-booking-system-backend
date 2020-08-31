@@ -2,10 +2,16 @@ import os
 import sqlite3
 
 def connect(db_name):
+    '''
+        Create connection with DB
+    '''
     conn = sqlite3.connect(db_name)
     return conn
 
 def create_schema(conn, query):
+    '''
+        Execute given SQLite query
+    '''
     prepare = conn.cursor()
     prepare.execute(query)
     conn.commit()

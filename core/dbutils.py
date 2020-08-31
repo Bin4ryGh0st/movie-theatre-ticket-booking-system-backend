@@ -4,6 +4,7 @@ from datetime import datetime
 
 class dbutil():
     def __init__(self):
+        '''Initializes the configuration required for DB'''
         self.__database = "db.sqlite3"
         self.__lazy_update_cooldown = 0
         self.MAX_COOLDOWN_REQUEST = 10
@@ -19,6 +20,7 @@ class dbutil():
         self.__lazy_db_update()
 
     def __enable_foreign_key_pragma(self):
+        '''Enables Foreign key PRAGMA in DB to successfully achieve ON DELETE CASCADE'''
         enable_foreign_key = '''
             PRAGMA foreign_keys=on;
         '''
@@ -27,6 +29,7 @@ class dbutil():
         self.__conn.commit()
 
     def __reduce_seat_count(self, show_id, previous_availability):
+        '''Reduces the number of total available seats for the give movie show by 1'''
         if previous_availability > 0:
             query = '''
                 UPDATE available_shows 
@@ -39,6 +42,7 @@ class dbutil():
             self.__conn.commit()
     
     def __increase_seat_count(self, show_id, previous_availability):
+        '''Increases the number of total available seats for the give movie show by 1'''
         if previous_availability < self.MAX_AVAILABLE_SLOTS:
             query = '''
                 UPDATE available_shows 
@@ -50,8 +54,16 @@ class dbutil():
             prepare.execute(query, (previous_availability+1 ,show_id,))
             self.__conn.commit()
 
-    def __lazy_db_update(self):
-        if self.__lazy_update_cooldown == 0:
+    def __lazy_db_update(self, bypass_cooldown = False):
+        ''' Checks for stale/expired movie shows and removes them
+            which triggres ON DELETE CASCADE and resulting deletion of stale/expired tickets from DB too.
+
+            Triggers after every self.MAX_COOLDOWN_REQUEST(=10) number of calls to this function or
+            Triggered after every 8 hours from add_show in core/dbutils.py
+            So in 8 hours or every 10 requests it get triggered and clear expired entries.
+            (Win Win!)
+        '''
+        if self.__lazy_update_cooldown == 0 or bypass_cooldown:
             show_db = self.list_shows()
             stale_show_ids = []
             current_timestamp = datetime.strptime(time.ctime(), "%a %b %d %H:%M:%S %Y") 
@@ -72,6 +84,12 @@ class dbutil():
         
             
     def add_show(self, timestamp, show_id):
+        '''Add a new movie show to DB
+           Also triggers __lazy_db_update
+
+           Triggered by refine_db_job in main.py in every 8 hours.
+        '''
+        self.__lazy_db_update(bypass_cooldown=True)
         query = '''
             INSERT INTO available_shows (show_id, show_time)
             VALUES (?, ?);
@@ -83,6 +101,9 @@ class dbutil():
         return show_id
 
     def book_ticket(self, username, contact, show_id, show_time, ticket_id):
+        '''
+            Book Ticket Functionality Wrappers for DB update.
+        '''
         self.__lazy_db_update()
         show_db = self.list_shows(show_id_only=True)
 
@@ -111,6 +132,9 @@ class dbutil():
             return {"Error" : "Incorrect Show ID or Movie already is HouseFull!"}
 
     def list_shows(self, show_id_only = False):
+        '''
+            List all available shows Functionality Wrappers for DB.
+        '''
         query = '''
             SELECT * FROM available_shows; 
         '''
@@ -136,6 +160,9 @@ class dbutil():
             return details
     
     def delete_ticket(self, ticket_id):
+        '''
+            Delete ticket Functionality Wrappers for DB update.
+        '''
         query = '''
             DELETE FROM booked_tickets WHERE ticket_id = ? ;
         '''
@@ -147,6 +174,9 @@ class dbutil():
         return {"Success" : "Tickect has been deleted iff it was present earlier!"}
         
     def get_show_bookings(self, show_id):
+        '''
+            List all bookings for particular show Functionality Wrappers for DB.
+        '''
         query = '''
             SELECT ticket_id FROM booked_tickets WHERE show_id = ? ;
         '''
@@ -166,6 +196,9 @@ class dbutil():
         return details
     
     def get_booking_details(self, ticket_id):
+        '''
+            Get booking/user details using given ticket_id Functionality Wrappers for DB.
+        '''
         query = '''
             SELECT * FROM booked_tickets WHERE ticket_id = ? ;
         '''
@@ -187,6 +220,9 @@ class dbutil():
             return {"Error" : "Details not found for {}!".format(ticket_id)}
 
     def get_show_details(self, show_id):
+        '''
+            Get show details using show_id Functionality Wrappers for DB.
+        '''
         query = '''
             SELECT * FROM available_shows WHERE show_id = ? ;
         '''
@@ -201,6 +237,9 @@ class dbutil():
         return details
 
     def change_ticket_timing(self, ticket_id, new_show_id):
+        '''
+            Update current time of the given ticket to new given show time Functionality Wrappers for DB update.
+        '''
         showdb = self.list_shows(show_id_only=True)
 
         if (new_show_id in showdb) and (showdb[new_show_id] > 0):
