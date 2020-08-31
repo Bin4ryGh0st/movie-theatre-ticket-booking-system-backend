@@ -4,7 +4,7 @@
 
 ##### Functionality :
 > 1. Endpoint for booking movie ticket for available shows.
->   *POST /book
+>   $POST /book
 > 2. Endpoint to update ticket timings.
 >   *PUT /update/<ticket_id>/new/show/id/<new_show_id>
 > 3. Endpoint to view all tickets for particular show.
