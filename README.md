@@ -4,18 +4,31 @@
 
 ##### Functionality :
 > 1. Endpoint for booking movie ticket for available shows.
+<br>
 > POST /book
+<br>
 > 2. Endpoint to update ticket timings.
+<br>
 > PUT /update/<ticket_id>/new/show/id/<new_show_id>
+<br>
 > 3. Endpoint to view all tickets for particular show.
+<br>
 > GET /list/all/tickets/for/show/<show_id>
+<br>
 > 4. Endpoint to delete particular ticket.
+<br>
 > DELETE /delete/ticket/<ticket_id>
+<br>
 > 5. Endpoint to view the user’s details based on the ticket id.
+<br>
 > GET /detail/<ticket_id>
+<br>
 > 6. Deletes expired shows/tickets from database using following techniques : 
+<br>
 > a. Lazy update : Triggers refining of database after every 10th(Variable) request to it.
+<br>
 > b. Scheduler : A parallel thread which triggers refining of database after every 8 hours(variable).
+<br>
 > c. ON DELETE CASCADE in database while creating schema which deletes all the expired tickets if the show is deleted itself using following query :
     `'''
         CREATE TABLE IF NOT EXISTS booked_tickets(
